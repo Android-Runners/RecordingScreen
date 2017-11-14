@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.view.Surface;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class RecordService extends Service {
+
     private MediaProjection mediaProjection;
     private MediaRecorder mediaRecorder;
     private VirtualDisplay virtualDisplay;
@@ -82,9 +84,11 @@ public class RecordService extends Service {
     }
 
     public boolean stopRecord() {
+
             if (!running) {
                 return false;
             }
+
             surface = mediaRecorder.getSurface();
 
             running = false;
@@ -101,16 +105,13 @@ public class RecordService extends Service {
     }
 
     private void initRecorder() {
-     //   mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // Устанавливает источник звука, используемый для записи
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE); // источник видео, используется для записи
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); // формат получаевомого файла записи
-        pathVideo = getsaveDirectory() + System.currentTimeMillis() + ".mp4";
+        pathVideo = getSaveDirectory() + System.currentTimeMillis() + ".mp4";
         mediaRecorder.setOutputFile(pathVideo); // Целевое местоположение и имя файла записи
         mediaRecorder.setVideoSize(width, height); // размер видео
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264); // Кодировщик видео
-   //     mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); // кодировщик аудио
         mediaRecorder.setVideoEncodingBitRate(1024 * 1024 * 5); // устанавливает "битрэйт" файла записи. Прописано - 5 мегабит
-        // 409600 бит - кодирование H264
         mediaRecorder.setVideoFrameRate(30); // частотак кадров в секунду
         try {
             mediaRecorder.prepare(); // подготавливает для записи и кодирования данных
@@ -119,9 +120,9 @@ public class RecordService extends Service {
         }
     }
 
-    public String getsaveDirectory() {
+    public String getSaveDirectory() {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            String rootDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + "ScreenRecord" + "/"; // Путь сохранения
+            String rootDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ScreenRecord/";
 
             File file = new File(rootDir);
             if (!file.exists()) {
@@ -133,6 +134,7 @@ public class RecordService extends Service {
             Toast.makeText(getApplicationContext(), rootDir, Toast.LENGTH_SHORT).show();
 
             return rootDir;
+
         } else {
             return null;
         }
