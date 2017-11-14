@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.view.Surface;
 import android.widget.Toast;
 
 import java.io.File;
@@ -19,12 +20,15 @@ public class RecordService extends Service {
     private MediaProjection mediaProjection;
     private MediaRecorder mediaRecorder;
     private VirtualDisplay virtualDisplay;
-
+    private Surface surface;
     private boolean running;
     private int width = 720;
     private int height = 1080;
     private int dpi;
+    private String pathVideo;
 
+    public String getPathVideo() { return pathVideo; }
+    public Surface getSurface() { return surface; }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -81,6 +85,8 @@ public class RecordService extends Service {
             if (!running) {
                 return false;
             }
+            surface = mediaRecorder.getSurface();
+
             running = false;
             mediaRecorder.stop();
             mediaRecorder.reset();
@@ -98,11 +104,13 @@ public class RecordService extends Service {
      //   mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // Устанавливает источник звука, используемый для записи
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE); // источник видео, используется для записи
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); // формат получаевомого файла записи
-        mediaRecorder.setOutputFile(getsaveDirectory() + System.currentTimeMillis() + ".mp4"); // Целевое местоположение и имя файла записи
+        pathVideo = getsaveDirectory() + System.currentTimeMillis() + ".mp4";
+        mediaRecorder.setOutputFile(pathVideo); // Целевое местоположение и имя файла записи
         mediaRecorder.setVideoSize(width, height); // размер видео
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264); // Кодировщик видео
    //     mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); // кодировщик аудио
-        mediaRecorder.setVideoEncodingBitRate(5 * 1024 * 1024); // устанавливает "битрэйт" файла записи. Прописано - 5 мегоабит
+        mediaRecorder.setVideoEncodingBitRate(1024 * 1024 * 5); // устанавливает "битрэйт" файла записи. Прописано - 5 мегабит
+        // 409600 бит - кодирование H264
         mediaRecorder.setVideoFrameRate(30); // частотак кадров в секунду
         try {
             mediaRecorder.prepare(); // подготавливает для записи и кодирования данных
