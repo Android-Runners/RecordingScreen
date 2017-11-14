@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 playBtn.setText(Uri.parse(recordService.getPathVideo()) + "");
                 videoView.setVideoURI(Uri.parse(recordService.getPathVideo()));
+                videoView.requestFocus();
+                videoView.start();
             }
         });
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -90,9 +92,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RECORD_REQUEST_CODE && resultCode == RESULT_OK) {
-            Uri videoUri = data.getData();
-            playBtn.setText(videoUri + " " + (data == null));
-            videoView.setVideoURI(videoUri);
             mediaProjection = projectionManager.getMediaProjection(resultCode, data);
             recordService.setMediaProject(mediaProjection);
             recordService.startRecord();
